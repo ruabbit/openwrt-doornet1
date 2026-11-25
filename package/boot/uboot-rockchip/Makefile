@@ -11,6 +11,9 @@ PKG_HASH:=b4f032848e56cc8f213ad59f9132c084dbbb632bc29176d024e58220e0efdf4a
 
 PKG_MAINTAINER:=Sarah Maedel <openwrt@tbspace.de>
 
+DOORNET1_DTS:=$(TOPDIR)/target/linux/rockchip/files-6.12/arch/arm64/boot/dts/rockchip/rk3328-doornet1.dts
+PKG_FILE_DEPENDS += $(DOORNET1_DTS)
+
 UBOOT_USE_BINMAN:=1
 UBOOT_USE_INTREE_DTC:=1
 
@@ -48,6 +51,13 @@ define U-Boot/rk3328/Default
   BUILD_SUBTARGET:=armv8
   DEPENDS:=+PACKAGE_u-boot-$(1):trusted-firmware-a-rk3328
   ATF:=rk3328_bl31.elf
+endef
+
+define U-Boot/doornet1-rk3328
+  $(U-Boot/rk3328/Default)
+  NAME:=EmbedFire DoorNet1
+  BUILD_DEVICES:= \
+    embedfire_doornet1
 endef
 
 define U-Boot/nanopi-r2c-rk3328
@@ -425,6 +435,7 @@ UBOOT_TARGETS := \
   rock-pi-4-rk3399 \
   rockpro64-rk3399 \
   rock-pi-s-rk3308 \
+  doornet1-rk3328 \
   nanopi-r2c-rk3328 \
   nanopi-r2c-plus-rk3328 \
   nanopi-r2s-rk3328 \
@@ -471,6 +482,15 @@ UBOOT_CUSTOMIZE_CONFIG := \
 UBOOT_MAKE_FLAGS += \
   BL31=$(STAGING_DIR_IMAGE)/$(ATF) \
   $(if $(TPL),ROCKCHIP_TPL=$(STAGING_DIR_IMAGE)/$(TPL))
+
+define Build/Prepare
+	$(call Build/Prepare/Default)
+	$(if $(filter doornet1-rk3328,$(BUILD_VARIANT)), \
+		$(CP) ./files/doornet1-rk3328/doornet1-rk3328_defconfig $(PKG_BUILD_DIR)/configs/ && \
+		$(CP) ./files/doornet1-rk3328/rk3328-doornet1-u-boot.dtsi $(PKG_BUILD_DIR)/arch/arm/dts/ && \
+		$(CP) $(DOORNET1_DTS) $(PKG_BUILD_DIR)/dts/upstream/src/arm64/rockchip/ \
+	)
+endef
 
 define Build/InstallDev
 	$(INSTALL_DIR) $(STAGING_DIR_IMAGE)

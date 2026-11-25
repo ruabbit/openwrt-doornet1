@@ -63,6 +63,14 @@ define Device/armsom_sige7
 endef
 TARGET_DEVICES += armsom_sige7
 
+define Device/embedfire_doornet1
+  $(Device/rk3328)
+  DEVICE_VENDOR := EmbedFire
+  DEVICE_MODEL := DoorNet1
+  DEVICE_PACKAGES := kmod-usb-net-rtl8152
+endef
+TARGET_DEVICES += embedfire_doornet1
+
 define Device/firefly_roc-rk3328-cc
   $(Device/rk3328)
   DEVICE_VENDOR := Firefly
